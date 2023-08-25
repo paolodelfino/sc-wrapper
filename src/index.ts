@@ -1,6 +1,6 @@
 import * as crypto from "crypto";
 import { Episode, Image, Movie, Season } from "./types";
-import { array_insert, compareStrings, get, get_of_page } from "./utils";
+import { array_insert, compare_strings, get, get_of_page } from "./utils";
 
 const SC_URL = "https://streamingcommunity.bet";
 const DEC_KEY_URL = "https://scws.work/storage/enc.key";
@@ -89,7 +89,7 @@ async function retrieve_movie_info(
   const friendly_name = movie_info.name;
   if (match_exact) {
     if (match_estimate) {
-      const { equal, matches, maxMatches } = compareStrings(
+      const { equal, matches, maxMatches } = compare_strings(
         match_exact,
         friendly_name
       );

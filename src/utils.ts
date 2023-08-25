@@ -64,7 +64,7 @@ export async function get_of_page(
 /**
  * @description a occurrences in b
  */
-export function compareStrings(a: string, b: string) {
+export function compare_strings(a: string, b: string) {
   const aParts = a.toLowerCase().split(" ");
   const bParts = b.toLowerCase().split(" ");
 
