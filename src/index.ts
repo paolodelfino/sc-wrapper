@@ -283,12 +283,6 @@ function get_iv(playlist: string): Uint8Array | undefined {
   return new Uint8Array(bytes);
 }
 
-/**
- *
- * @param {string} master_playlist_url
- * @param {"url" | "buffer"} return_type
- * @returns {Promise<string | Buffer>}
- */
 export async function download(
   master_playlist_url: string,
   return_type: "url" | "buffer"
