@@ -51,3 +51,16 @@ async function download(
   return_type: "url" | "buffer"
 ): Promise<string | Buffer>
 ```
+
+# NPM
+
+_You can find it on [npm](https://www.npmjs.com/package/sc-wrapper?activeTab=readme)_
+
+# Build
+
+**You can manually build your version, you'll find the dist in the [appropriate folder](./dist)**
+
+```bash
+npm install
+npm run build
+```
