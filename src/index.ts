@@ -379,3 +379,5 @@ export async function download(
   );
   return movie_buffer;
 }
+
+export type { Movie, Season, Episode, Image };
