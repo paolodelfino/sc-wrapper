@@ -16,7 +16,8 @@
   },
   "scripts": {
     "build": "tsup",
-    "dev": "npm run build -- --watch"
+    "dev": "npm run build -- --watch",
+    "test": "node test/index.js"
   },
   "repository": {
     "type": "git",
@@ -32,6 +33,7 @@
   "author": "paolodelfino",
   "license": "MIT",
   "devDependencies": {
+    "@types/node": "^20.5.4",
     "tsup": "^7.2.0",
     "typescript": "^5.2.2"
   }
