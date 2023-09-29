@@ -17,7 +17,8 @@
   "scripts": {
     "build": "tsup",
     "dev": "npm run build -- --watch",
-    "test": "node test/index.js"
+    "test": "node test/index.js",
+    "publish": "npm run build && npm publish"
   },
   "repository": {
     "type": "git",
