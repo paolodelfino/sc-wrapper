@@ -196,19 +196,15 @@ export async function get_playlist(
     )
   )[0];
 
-  const playlistInfo = await get_of_page(
+  const master_playlist_raw = await get_of_page(
     video_player_embed_page_raw,
-    new RegExp(
-      "window[.]masterPlaylistParams = (.+)let masterPlaylistUrl = new URL[(]'(.+)'[)].+for [(]",
-      "s"
-    ),
-    [1, 2]
+    new RegExp("window[.]masterPlaylist = (.+)window.canPlayFHD", "s"),
+    [1]
   );
 
-  const master_playlist_params = JSON.parse(playlistInfo[0].replace(/'/g, '"')),
-    master_playlist_endpoint = playlistInfo[1];
+  const master_playlist = (0, eval)(`const b = ${master_playlist_raw[0]}; b`);
 
-  const master_playlist_url = `${master_playlist_endpoint}?token=${master_playlist_params.token}&token720p=${master_playlist_params.token720p}&token360p=${master_playlist_params.token360p}&token480p=${master_playlist_params.token480p}&token1080p=${master_playlist_params.token1080p}&expires=${master_playlist_params.expires}&canCast=${master_playlist_params.canCast}&n=1`;
+  const master_playlist_url = `${master_playlist.url}?token=${master_playlist.params.token}&token720p=${master_playlist.params.token720p}&token360p=${master_playlist.params.token360p}&token480p=${master_playlist.params.token480p}&token1080p=${master_playlist.params.token1080p}&expires=${master_playlist.params.expires}`;
   return master_playlist_url;
 }
 
@@ -253,7 +249,7 @@ async function retrieve_video_playlist(
 
 async function get_buffer(url: string): Promise<ArrayBuffer> {
   const response = await fetch(url).catch((err) => {
-    throw new Error(err.message);
+    throw new Error(`While trying to get ${url}: ${err}`);
   });
   const buffer = await response.arrayBuffer();
   return buffer;
