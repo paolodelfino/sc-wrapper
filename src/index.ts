@@ -2,8 +2,17 @@ import * as crypto from "crypto";
 import { Episode, Image, Movie, Season } from "./types";
 import { array_insert, compare_strings, get, get_of_page } from "./utils";
 
-const SC_URL = "https://streamingcommunity.at";
+export let SC_URL = "https://streamingcommunity.care";
 const DEC_KEY_URL = "https://scws.work/storage/enc.key";
+
+export async function check_url() {
+  const res = await fetch(SC_URL).catch(() => ({ status: 404 }));
+  return res.status == 200;
+}
+
+export function update_url(url: string) {
+  SC_URL = url;
+}
 
 /**
  * @description It can match the exact name or, if exact and estimate are true, can estimate the match of the movie title relative to the name we're searching for

@@ -1,5 +1,19 @@
 import fs from "fs";
-import { download, get_playlist, search_movie } from "../dist/index.mjs";
+import {
+  SC_URL,
+  check_url,
+  download,
+  get_playlist,
+  search_movie,
+  update_url,
+} from "../dist/index.mjs";
+
+if (!(await check_url())) {
+  console.log(`${SC_URL} is not valid anymore.`);
+  const new_url = "https://streamingcommunity.at";
+  console.log(`Updating url to ${new_url}`);
+  update_url(new_url);
+}
 
 const query1 = await search_movie("enola holmes", {
   match_estimate: true,
