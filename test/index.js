@@ -39,16 +39,9 @@ console.log("(Should possibly match more than one film)");
 console.log(query3);
 console.assert(query3.length >= 1);
 
-const playlist1 = await get_playlist({
-  movie_id: query1[0].id,
-});
-const playlist2 = await get_playlist({
-  movie_id: query1[1].id,
-});
-const playlist3 = await get_playlist({
-  movie_id: query3[0].id,
-  episode_id: query3[0].seasons[2].episodes[3].id,
-});
+const playlist1 = await get_playlist(query1[0].id, query1[0].scws_id);
+const playlist2 = await get_playlist(query1[1].id, query1[1].scws_id);
+const playlist3 = await get_playlist(query3[0].id, query3[0].seasons[2].episodes[3].scws_id, query3[0].seasons[2].episodes[3].id);
 
 console.log("(Should be a working playlist)");
 console.log(playlist1);

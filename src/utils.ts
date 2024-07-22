@@ -2,7 +2,7 @@ export async function get(url: string, headers?: Headers): Promise<string> {
   const response = await fetch(url, {
     headers,
   }).catch((err) => {
-    throw new Error(`While trying to get ${url}: ${err}`);
+    throw new Error(`While trying to get '${url}': ${err}`);
   });
   return response.text();
 }

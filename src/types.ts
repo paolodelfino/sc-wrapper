@@ -8,6 +8,7 @@ export type Episode = {
   number: number;
   name: string;
   plot: string;
+  scws_id: number;
 };
 
 export type Season = {

@@ -1,8 +1,8 @@
 import * as crypto from "crypto";
 import { Episode, Image, Movie, Season } from "./types";
-import { array_insert, compare_strings, get, get_of_page } from "./utils";
+import { array_insert, compare_strings, decode_html, get, get_of_page } from "./utils";
 
-export let SC_URL = "https://streamingcommunity.care";
+export let SC_URL = "https://streamingcommunity.boston";
 const DEC_KEY_URL = "https://scws.work/storage/enc.key";
 
 export async function check_url() {
@@ -142,6 +142,7 @@ async function retrieve_movie_info(
         name: episode.name,
         number: episode.number,
         plot: episode.plot,
+        scws_id: episode.scws_id,
       });
     }
 
@@ -167,54 +168,25 @@ async function retrieve_movie_info(
   };
 }
 
-export async function get_playlist(
-  options: {
-    movie_id: Movie["id"];
-  } & (
-    | {
-        episode_id: number;
-      }
-    | {
-        episode_id?: undefined;
-      }
-  )
-): Promise<string> {
-  const { movie_id, episode_id } = options;
-
-  let video_player_page_url = `${SC_URL}/watch/${movie_id}`;
-  if (episode_id) {
-    video_player_page_url += `?e=${episode_id}`;
-  }
-
-  const data_page = JSON.parse(
-    (
-      await get_of_page(
-        video_player_page_url,
-        new RegExp('<div id="app" data-page="(.+)"><!--', "s"),
-        [1]
-      )
-    )[0]
-  );
-
-  const video_player_iframe_url = data_page.props.embedUrl;
-  const video_player_embed_page_raw = (
-    await get_of_page(
-      video_player_iframe_url,
-      new RegExp('src="(.+)".+frameborder', "s"),
-      [1]
-    )
-  )[0];
-
-  const master_playlist_raw = await get_of_page(
-    video_player_embed_page_raw,
-    new RegExp("window[.]masterPlaylist = (.+)window.canPlayFHD", "s"),
-    [1]
-  );
-
-  const master_playlist = (0, eval)(`const b = ${master_playlist_raw[0]}; b`);
-
-  const master_playlist_url = `${master_playlist.url}?token=${master_playlist.params.token}&token720p=${master_playlist.params.token720p}&token360p=${master_playlist.params.token360p}&token480p=${master_playlist.params.token480p}&token1080p=${master_playlist.params.token1080p}&expires=${master_playlist.params.expires}`;
-  return master_playlist_url;
+export async function get_playlist(id: number, scwsId: number, episodeId: number = 0): Promise<string> {
+  return fetch(`${SC_URL}/iframe/${id}?episode_id=${episodeId}`, {cache: "no-cache"}).then(res => res.text()).then(sciframe => {
+    const srcIndex = sciframe.indexOf("src")
+    const endIndex = sciframe.indexOf('"', srcIndex + 77)
+    const embedUrl = new URL(decode_html(sciframe.slice(srcIndex + 5, endIndex)))
+    return fetch(embedUrl).then(res => res.text()).then(scembed => {
+      const tokenIndex = scembed.indexOf("token") + 1
+      const tokenEndIndex = scembed.indexOf("'", tokenIndex + 28)
+      const expiresIndex = scembed.indexOf("e", tokenEndIndex) + 1
+      const token = scembed.slice(tokenIndex + 8, tokenEndIndex)
+      const expires = scembed.slice(expiresIndex + 10, scembed.indexOf("'", expiresIndex + 14))
+      const playlistUrl = new URL(`https://vixcloud.co/playlist/${scwsId}`)
+      playlistUrl.searchParams.append("token", token)
+      playlistUrl.searchParams.append("expires", expires)
+      if (embedUrl.searchParams.get("b")) playlistUrl.searchParams.append("b", "1");
+      if (embedUrl.searchParams.get("canPlayFHD")) playlistUrl.searchParams.append("h", "1");
+      return playlistUrl.toString()
+    })
+  })
 }
 
 async function retrieve_video_playlist(
@@ -288,12 +260,18 @@ function get_iv(playlist: string): Uint8Array | undefined {
   return new Uint8Array(bytes);
 }
 
+// TODO: Problem with decrypting
 export async function download(
   master_playlist_url: string,
   return_type: "url" | "buffer"
 ): Promise<string | Buffer> {
   const master_playlist = await get(master_playlist_url);
-  const playlist = await retrieve_video_playlist(master_playlist);
+  let playlist = ""
+  try {
+    playlist = await retrieve_video_playlist(master_playlist);
+  } catch (e) {
+    console.log("shit", e)
+  }
 
   let segments: ArrayBuffer[] = [];
   const key = await get_key();
